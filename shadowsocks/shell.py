@@ -335,23 +335,43 @@ def get_config(is_local):
     config['tunnel_remote_port'] = config.get('tunnel_remote_port', 53)
     config['tunnel_port'] = config.get('tunnel_port', 53)
 
-    logging.getLogger('').handlers = []
-    logging.addLevelName(VERBOSE_LEVEL, 'VERBOSE')
-    if config['verbose'] >= 2:
-        level = VERBOSE_LEVEL
-    elif config['verbose'] == 1:
-        level = logging.DEBUG
-    elif config['verbose'] == -1:
-        level = logging.WARN
-    elif config['verbose'] <= -2:
-        level = logging.ERROR
-    else:
-        level = logging.INFO
-    verbose = config['verbose']
-    logging.basicConfig(level=level,
-                        format='%(asctime)s %(levelname)-8s %(message)s',
-                        datefmt='%Y-%m-%d %H:%M:%S')
-
+    logDict = {
+        'version': 1,
+        'disable_existing_loggers': False,
+        'formatters': {
+            'standard': {
+                'format': '%(asctime)s [%(levelname)s] %(name)s: %(message)s'
+            },
+        },
+        'handlers': {
+            'default': {
+                'level': 'INFO',
+                'formatter': 'standard',
+                'class': 'logging.handlers.RotatingFileHandler',
+                'filename': 'shadowsocks.log',
+                'maxBytes': 1000000,
+                'backupCount': 5,
+            },
+        },
+        'loggers': {
+            '': {
+                'handlers': ['default'],
+                'level': 'INFO',
+                'propagate': True
+            },
+            'django.request': {
+                'handlers': ['default'],
+                'level': 'WARN',
+                'propagate': False
+            },
+        },
+        'root': {
+            'handlers': ['default'],
+            'level': 'INFO',
+        },
+    }
+    logging.config.dictConfig(logDict)
+}
     check_config(config, is_local)
 
     return config
