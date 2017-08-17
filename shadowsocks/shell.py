@@ -23,6 +23,7 @@ import json
 import sys
 import getopt
 import logging
+from logging import config as logconfig
 import traceback
 
 from functools import wraps
@@ -370,8 +371,7 @@ def get_config(is_local):
             'level': 'INFO',
         },
     }
-    logging.config.dictConfig(logDict)
-}
+    logconfig.dictConfig(logDict)
     check_config(config, is_local)
 
     return config
